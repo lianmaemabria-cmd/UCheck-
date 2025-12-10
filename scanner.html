@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Attendance Scanner</title>
+</head>
+
+<body style="font-family: Arial; text-align:center;">
+<h2>QR Attendance Scanner</h2>
+
+<video id="preview" width="320" height="320" style="border:1px solid #ccc;"></video>
+
+<script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+
+<script>
+// Your Google Apps Script Web App URL
+const WEBAPP = "https://script.google.com/macros/s/AKfycbzaQldHw9iYMVrzzgmcQmc2iQ82iP9XJB2adjI50rLV/dev";
+
+let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+
+scanner.addListener('scan', function (content) {
+    console.log("Scanned:", content);
+
+    // Send scanned Student ID to Apps Script
+    fetch(WEBAPP, {
+        method: "POST",
+        body: new URLSearchParams({ id: content })
+    })
+    .then(r => r.text())
+    .then(txt => {
+        alert("Attendance recorded for ID: " + content);
+    })
+    .catch(err => {
+        alert("Error recording attendance.");
+    });
+});
+
+// Start camera
+Instascan.Camera.getCameras().then(function (cameras) {
+    if (cameras.length > 0) {
+        scanner.start(cameras[0]);
+    } else {
+        alert("No camera found!");
+    }
+});
+</script>
+
+</body>
+</html>
+
